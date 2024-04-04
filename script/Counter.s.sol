@@ -1,12 +1,21 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Script, console} from "forge-std/Script.sol";
+import {Script} from "forge-std/Script.sol";
+import {Counter} from "../src/Counter.sol";
 
-contract CounterScript is Script {
-    function setUp() public {}
+contract Deploy is Script {
+    address internal deployer;
+    Counter internal counter;
+    address public router = 0x506a777a65730D483f07089d1ecdFE947a8c3fEa;
+    address public manager = 0x6Ceec9fA9269F0807797A9f05522fe70DB8d4f90;
+    function setUp() public {
+        (deployer, ) = deriveRememberKey(vm.envString("MNEMONIC"), 0);
+    }
 
     function run() public {
-        vm.broadcast();
+        vm.startBroadcast(deployer);
+        counter = new Counter(router, manager);
+        vm.stopBroadcast();
     }
 }
