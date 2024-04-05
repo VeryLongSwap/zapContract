@@ -47,7 +47,7 @@ library typer {
 		uint256 deadline;
 	}
 }
-contract Counter is Ownable {
+contract Zapper is Ownable {
 	uint256 public number;
 	VLSRouter public vlsRouter;
 	PositionManager public positionManager;
