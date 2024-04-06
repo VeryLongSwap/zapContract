@@ -45,6 +45,9 @@ contract ZapperTest is Test {
 		zapper.Zap{value: 0.01 ether}(WETH9, USDC, WETH9, 10000000000000000, 5000000000000000, 2500, 194300, 196400, user, 8712316318, data);
 		uint afterValue = IERC20(manager).balanceOf(user);
 		assertEq(beforeValue + 1, afterValue);
+		assertEq(address(zapper).balance, 0);
+		assertEq(IERC20(USDC).balanceOf(address(zapper)), 0);
+		assertEq(IERC20(WETH9).balanceOf(address(zapper)), 0);
 	}
 
 	function testZapToEth() public payable {
@@ -56,6 +59,9 @@ contract ZapperTest is Test {
 		zapper.Zap(USDC, USDC, WETH9, 20000000, 10000000, 2500, 194300, 196400, user, 8712316318, data);
 		uint afterValue = IERC20(manager).balanceOf(user);
 		assertEq(beforeValue + 1, afterValue);
+		assertEq(address(zapper).balance, 0);
+		assertEq(IERC20(USDC).balanceOf(address(zapper)), 0);
+		assertEq(IERC20(WETH9).balanceOf(address(zapper)), 0);
 	}
 
 	function testZapWithAnyToken() public payable {
@@ -66,6 +72,9 @@ contract ZapperTest is Test {
 		zapper.Zap(USDC, USDT, USDC, 10000000, 5000000, 500, -510, 530, user, 8712316318, data);
 		uint afterValue = IERC20(manager).balanceOf(user);
 		assertEq(beforeValue + 1, afterValue);
+		assertEq(address(zapper).balance, 0);
+		assertEq(IERC20(USDC).balanceOf(address(zapper)), 0);
+		assertEq(IERC20(USDT).balanceOf(address(zapper)), 0);
 	}
 
 }

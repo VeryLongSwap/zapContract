@@ -75,6 +75,8 @@ contract Zapper is Ownable {
 		bytes[] memory params;
 		if (token[0] == WETH9 || token[1] == WETH9) {
 			params = new bytes[](2);
+			// refundETH
+			params[1] = hex"12210e8a";
 		}else {
 			params = new bytes[](1);
 		}
@@ -94,8 +96,6 @@ contract Zapper is Ownable {
 			deadline
 		);
 
-		// refundETH
-		if (token[0] == WETH9 || token[1] == WETH9) params[1] = hex"12210e8a";
 		positionManager.multicall{value: msg.value}(params);
 
 		
