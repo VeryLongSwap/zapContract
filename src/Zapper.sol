@@ -48,7 +48,6 @@ library typer {
 	}
 }
 contract Zapper is Ownable {
-	uint256 public number;
 	VLSRouter public vlsRouter;
 	PositionManager public positionManager;
 	address public WETH9;
@@ -173,10 +172,11 @@ contract Zapper is Ownable {
 
 		if(token0 == WETH9 || token1 == WETH9){
 			this.mint{value: address(this).balance}(lpPair, pairAmount, fee, tickLower, tickUpper, recipient, deadline);
+			withdrawEth();
 		} else {
 			this.mint(lpPair, pairAmount, fee, tickLower, tickUpper, recipient, deadline);
 		}
-		withdrawEth();	
+
 		withdrawToken(lpPair);
 
 		
