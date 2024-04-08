@@ -52,12 +52,12 @@ contract Zapper is Ownable {
 	PositionManager public positionManager;
 	address public WETH9;
 	constructor (
-		address _routerAddress,
-		address _managerAddress,
+		address routerAddress,
+		address rmanagerAddress,
 		address _WETH9Address
 	) Ownable(msg.sender) {
-		vlsRouter = VLSRouter(_routerAddress);
-		positionManager = PositionManager(_managerAddress);
+		vlsRouter = VLSRouter(routerAddress);
+		positionManager = PositionManager(rmanagerAddress);
 		WETH9 = _WETH9Address;
 	}
 
@@ -98,17 +98,17 @@ contract Zapper is Ownable {
 	}
 
 	function multiSwap(
-		uint256 _deadline,
-		bytes[] calldata _data
+		uint256 deadline,
+		bytes[] calldata data
 	) external payable {
 
-		vlsRouter.multicall{value: msg.value}(_deadline, _data);
+		vlsRouter.multicall{value: msg.value}(deadline, data);
 	}
 
-	function withdrawToken(address[] memory _address) public {
-		for(uint i = 0; i < _address.length; i++){
-			if (_address[i] != WETH9) {
-				IERC20 token = IERC20(_address[i]);
+	function withdrawToken(address[] memory tokenAddress) public {
+		for(uint i = 0; i < tokenAddress.length; i++){
+			if (tokenAddress[i] != WETH9) {
+				IERC20 token = IERC20(tokenAddress[i]);
 				
 				uint balance = token.balanceOf(address(this));
 				if (balance > 0) token.transfer(msg.sender, balance);
@@ -124,8 +124,9 @@ contract Zapper is Ownable {
 		 }
 	}
 
-	function approver(address _tokenAddress, address _to, uint value) public onlyOwner {
-		IERC20(_tokenAddress).approve(address(_to), value);
+	function approver(address tokenAddress, uint value) public onlyOwner {
+		IERC20(tokenAddress).approve(address(vlsRouter), value);
+		IERC20(tokenAddress).approve(address(positionManager), value);
 	}
 
 	function zap(
