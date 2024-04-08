@@ -80,7 +80,6 @@ contract Zapper is Ownable {
 		}else {
 			params = new bytes[](1);
 		}
-		
 
 		// 88316456 = mint
 		params[0] = abi.encodeWithSelector(hex"88316456", token[0],
@@ -95,10 +94,7 @@ contract Zapper is Ownable {
 			recipient,
 			deadline
 		);
-
 		positionManager.multicall{value: msg.value}(params);
-
-		
 	}
 
 	function multiSwap(
@@ -132,7 +128,7 @@ contract Zapper is Ownable {
 		IERC20(_tokenAddress).approve(address(_to), value);
 	}
 
-	function Zap(
+	function zap(
 		address fromToken,
 		address token0,
 		address token1,
