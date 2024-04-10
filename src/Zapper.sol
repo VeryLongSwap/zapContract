@@ -12,18 +12,18 @@ interface VLSRouter {
 	function deployer() external view returns (address);
 
 	function exactInputSingle(
-		typer.ExactInputSingleParams calldata params
+		typeStrage.ExactInputSingleParams calldata params
 	) external payable returns (uint256 amountOut);
 }
 
 interface PositionManager {
 	function mint(
-		typer.MintParams calldata params
+		typeStrage.MintParams calldata params
 	) external payable returns (bytes memory result);
 function multicall(bytes[] calldata data) external payable returns (bytes[] memory results);
 	function refundETH() external payable;
 }
-library typer {
+library typeStrage {
 	struct ExactInputSingleParams {
 		address tokenIn;
 		address tokenOut;
@@ -69,7 +69,7 @@ contract Zapper is Ownable {
 		int24 tickUpper,
 		address recipient,
 		uint256 deadline
-	) public payable {
+	) public payable returns (uint256, uint256) {
 		require(token.length == 2 && amount.length == 2, "length mismatched");
 
 		bytes[] memory params;
@@ -94,7 +94,9 @@ contract Zapper is Ownable {
 			recipient,
 			deadline
 		);
-		positionManager.multicall{value: msg.value}(params);
+
+		bytes memory result = positionManager.multicall{value: msg.value}(params)[0];
+		return abi.decode(result, (uint256, uint256));
 	}
 
 	function multiSwap(
@@ -143,6 +145,14 @@ contract Zapper is Ownable {
 		bytes[] calldata swapParams
 	) public payable {
 	
+		emit callZap(
+			fromToken,
+			token0,
+			token1,
+			fullAmount,
+			fee,
+			recipient
+		);
 	
 		if (fromToken != WETH9) {
 			IERC20(fromToken).transferFrom(msg.sender, address(this),	fullAmount);
@@ -166,14 +176,15 @@ contract Zapper is Ownable {
 				pairAmount[i] = IERC20(lpPair[i]).balanceOf(address(this));
 			}
 		}
-
+		uint256 amount0;
+		uint256 amount1;
 		if(token0 == WETH9 || token1 == WETH9){
-			this.mint{value: address(this).balance}(lpPair, pairAmount, fee, tickLower, tickUpper, recipient, deadline);
+			(amount0, amount1) = this.mint{value: address(this).balance}(lpPair, pairAmount, fee, tickLower, tickUpper, recipient, deadline);
 			withdrawEth();
 		} else {
-			this.mint(lpPair, pairAmount, fee, tickLower, tickUpper, recipient, deadline);
+			(amount0, amount1) = this.mint(lpPair, pairAmount, fee, tickLower, tickUpper, recipient, deadline);
 		}
-
+		emit minted(token0, token1, amount0, amount1);
 		withdrawToken(lpPair);
 
 		
@@ -184,9 +195,23 @@ contract Zapper is Ownable {
   }
 
 	receive() external payable {
-		emit rcv();
+		emit rcv(msg.value);
 	}
 
 	event fall(string memo);
-	event rcv();
+	event rcv(uint);
+	event callZap(
+		address fromToken,
+		address token0,
+		address token1,
+		uint256 fullAmount,
+		uint24 fee,
+		address recipient
+	);
+	event minted(
+		address token0,
+		address token1,
+		uint256 amount0,
+		uint256 amount1
+	);
 }
