@@ -187,8 +187,14 @@ contract Zapper is Ownable, ReentrancyGuard {
 		}
 		emit minted(token0, token1, amount0, amount1);
 		_withdrawToken(lpPair);
+	}
 
-		
+	function emergencyWithdrawETH() public onlyOwner {
+		_withdrawEth();
+	}
+	
+	function emergencyWithdraw(address[] calldata tokenAddress) public onlyOwner {
+		_withdrawToken(tokenAddress);
 	}
 
 	receive() external payable {
