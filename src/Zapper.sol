@@ -69,7 +69,7 @@ contract Zapper is Ownable {
 		int24 tickUpper,
 		address recipient,
 		uint256 deadline
-	) public payable returns (uint256, uint256) {
+	) external payable returns (uint256, uint256) {
 		require(token.length == 2 && amount.length == 2, "length mismatched");
 
 		bytes[] memory params;
