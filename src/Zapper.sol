@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 import { IERC20 } from "openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
+import "openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 
 interface VLSRouter {
 	function multicall(
@@ -47,7 +48,7 @@ library typeStrage {
 		uint256 deadline;
 	}
 }
-contract Zapper is Ownable {
+contract Zapper is Ownable, ReentrancyGuard {
 	VLSRouter public vlsRouter;
 	PositionManager public positionManager;
 	address public WETH9;
@@ -143,7 +144,7 @@ contract Zapper is Ownable {
 		address recipient,
 		uint256 deadline,
 		bytes[] calldata swapParams
-	) public payable {
+	) external payable nonReentrant {
 	
 		emit callZap(
 			fromToken,
