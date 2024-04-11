@@ -107,7 +107,7 @@ contract Zapper is Ownable {
 		vlsRouter.multicall{value: msg.value}(deadline, data);
 	}
 
-	function withdrawToken(address[] memory tokenAddress) public {
+	function _withdrawToken(address[] memory tokenAddress) internal {
 		for(uint i = 0; i < tokenAddress.length; i++){
 			if (tokenAddress[i] != WETH9) {
 				IERC20 token = IERC20(tokenAddress[i]);
@@ -119,7 +119,7 @@ contract Zapper is Ownable {
 		}
 	}
 
-	function withdrawEth() public payable {
+	function _withdrawEth() internal {
 		 if (address(this).balance > 0) {
 				(bool success, ) = msg.sender.call{value: address(this).balance}("");
 				require(success, "Failed to send Ether");
@@ -180,25 +180,19 @@ contract Zapper is Ownable {
 		uint256 amount1;
 		if(token0 == WETH9 || token1 == WETH9){
 			(amount0, amount1) = this.mint{value: address(this).balance}(lpPair, pairAmount, fee, tickLower, tickUpper, recipient, deadline);
-			withdrawEth();
+			_withdrawEth();
 		} else {
 			(amount0, amount1) = this.mint(lpPair, pairAmount, fee, tickLower, tickUpper, recipient, deadline);
 		}
 		emit minted(token0, token1, amount0, amount1);
-		withdrawToken(lpPair);
+		_withdrawToken(lpPair);
 
 		
 	}
 
-	fallback() external {
-		emit fall(msg.sender);
-  }
-
 	receive() external payable {
 		emit rcv(msg.sender, msg.value);
 	}
-
-	event fall(address);
 	event rcv(address, uint);
 	event callZap(
 		address fromToken,
